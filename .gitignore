@@ -1,0 +1,5 @@
+uploaded_files/
+database/
+.idea/
+src/main/migrations/
+dump.rdb
