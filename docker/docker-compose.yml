@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  redis:
+    image: redis:alpine
+    command: redis-server
+    ports:
+      - '6379:6379'
+
+  picasso:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    entrypoint: /app/docker/django_entrypoint.sh
+    volumes:
+      - ../uploaded_files:/app/uploaded_files
+    ports:
+      - '8000:8000'
+    depends_on:
+      - redis
+      - db
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+      DJANGO_DB: postgresql
+      POSTGRES_HOST: db
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+
+  celery:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    entrypoint: /app/docker/celery_entrypoint.sh
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379
+      CELERY_RESULT_BACKEND: redis://redis:6379
+
+      # Adding these environments too for correct worker work:
+      DJANGO_DB: postgresql
+      POSTGRES_HOST: db
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+    depends_on:
+      - picasso
+      - redis
+      - db
+
+  db:
+    image: postgres:13.0-alpine
+    restart: unless-stopped
+    volumes:
+      - ../database:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'

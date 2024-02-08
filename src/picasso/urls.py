@@ -23,8 +23,8 @@ from rest_framework import routers
 from main import views
 
 router = routers.DefaultRouter()
-router.register(r'upload', views.UploadFileView)
-router.register(r'files', views.ShowFilesView)
+router.register(r'upload', views.UploadFileView, basename='upload')
+router.register(r'files', views.ShowFilesView, basename='files')
 
 
 urlpatterns = [

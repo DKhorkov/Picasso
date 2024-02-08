@@ -78,12 +78,27 @@ WSGI_APPLICATION = 'picasso.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+# Added option to work with postgreSQL database (mostly for docker):
+DB_SQLITE = "sqlite"
+DB_POSTGRESQL = "postgresql"
+
+DATABASES_ALL = {
+    DB_SQLITE: {
+        "ENGINE": "django.db.backends.sqlite3",
         'NAME': BASE_DIR.parent / 'database' / 'db.sqlite3',
-    }
+    },
+    DB_POSTGRESQL: {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+        "NAME": os.environ.get("POSTGRES_NAME", "postgres"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "PORT": int(os.environ.get("POSTGRES_PORT", "5432")),
+    },
 }
+
+# Override default database:
+DATABASES = {"default": DATABASES_ALL[os.environ.get("DJANGO_DB", DB_SQLITE)]}
 
 
 # Password validation
@@ -110,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'  # changed to save local time, not UTC-0
 
 USE_I18N = True
 
@@ -127,9 +142,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Celery settings
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+# Celery settings:
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 
 MEDIA_ROOT = f'{os.getcwd()}/'
 MEDIA_URL = '/uploaded_files/'
