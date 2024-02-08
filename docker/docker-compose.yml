@@ -11,7 +11,7 @@ services:
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-    entrypoint: /app/docker/django_entrypoint.sh
+    entrypoint: /app/docker/django-entrypoint.sh
     volumes:
       - ../uploaded_files:/app/uploaded_files
     ports:
@@ -33,7 +33,7 @@ services:
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
-    entrypoint: /app/docker/celery_entrypoint.sh
+    entrypoint: /app/docker/celery-entrypoint.sh
     environment:
       CELERY_BROKER_URL: redis://redis:6379
       CELERY_RESULT_BACKEND: redis://redis:6379
